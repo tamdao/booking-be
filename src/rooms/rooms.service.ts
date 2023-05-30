@@ -47,8 +47,6 @@ export class RoomsService {
       where,
     });
 
-    console.log('bookings', bookings);
-
     const roomIds = bookings.map((b) => b.roomId);
 
     return Promise.all([
