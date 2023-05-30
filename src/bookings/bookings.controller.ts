@@ -78,8 +78,11 @@ export class BookingsController {
   }
 
   @Get()
-  async findAll(@Query() query: FindAllQuery) {
+  async findAll(@GetUser() user, @Query() query: FindAllQuery) {
     const [total, items] = await this.bookingsService.findAll({
+      where: {
+        userId: user.id,
+      },
       skip: query.offset,
       take: query.limit,
     });
