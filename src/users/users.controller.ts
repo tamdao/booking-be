@@ -13,6 +13,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { SkipAuth } from 'src/auth/skip-auth.decorator';
 import { EncryptService } from 'src/services/encrypt/encrypt.service';
+import { GetUser } from 'src/decorators/get-user.decorator';
+import { User } from '@prisma/client';
 
 @Controller('users')
 export class UsersController {
@@ -57,7 +59,15 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @GetUser() user: User,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    if (user.id !== id) {
+      throw new BadRequestException('Invalid credentials.');
+    }
+
     return this.usersService
       .update({ where: { id }, data: updateUserDto })
       .then((user) => ({
@@ -68,7 +78,11 @@ export class UsersController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@GetUser() user: User, @Param('id') id: string) {
+    if (user.id !== id) {
+      throw new BadRequestException('Invalid credentials.');
+    }
+
     return this.usersService.remove({ id }).then((user) => ({
       id: user.id,
       email: user.email,
